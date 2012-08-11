@@ -1,0 +1,11 @@
+Flask==0.9
+Flask-Babel==0.8
+Flask-Login==0.1.3
+Flask-Mail==0.6.1
+Flask-Redis==0.2
+Flask-WTF==0.8
+Flask-SQLAlchemy==0.16
+WTForms==1.0.1
+redis==2.6.0
+celery==3.0.5
+-e git://github.com/greggyNapalm/firebat-console.git@d4898caa8fe0ee1436025196b530b3b4d5c841ac#egg=firebat_console-dev
