@@ -8,4 +8,5 @@ Flask-SQLAlchemy==0.16
 WTForms==1.0.1
 redis==2.6.0
 celery==3.0.5
+psycopg2==2.4.5
 -e git://github.com/greggyNapalm/firebat-console.git@d4898caa8fe0ee1436025196b530b3b4d5c841ac#egg=firebat_console-dev
