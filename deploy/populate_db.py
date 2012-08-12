@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- encoding: utf-8 -*-
 
 """
 firebat-overlord.populate_db
@@ -8,8 +9,14 @@ Command line script to create schema in existing postgresql database.
 **For initial deployment only**
 """
 
+
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+
 from fireoverlord import db
-from fireoverlord.models import Status, Test 
+from fireoverlord.models import User, Server, Line, Route, Dc, Test_cfg,\
+        Test, Fire
 
 
 def main():
