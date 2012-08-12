@@ -58,6 +58,7 @@ def logout():
     logout_user()
     return redirect(url_for("index"))
 
+
 # Flask-Admin
 def admin_only():
     try:
@@ -100,6 +101,6 @@ def index():
     return 'Hello Worlds -->!'
 
 #from status import status
-#from test import test
+from test import test
 #app.register_blueprint(status, url_prefix='/v1/status')
-#app.register_blueprint(test, url_prefix='/v1/test')
+app.register_blueprint(test, url_prefix='/v1/test')

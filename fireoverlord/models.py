@@ -7,10 +7,12 @@ firebat-overlord.models
 Objects mapping for whole app
 """
 
-#from datetime import datetime
+from datetime import datetime
 
 from sqlalchemy import *
 from sqlalchemy.dialects import postgresql
+import simplejson as json
+
 from . import db
 
 
@@ -100,15 +102,35 @@ class Test_cfg(db.Model):
     id = Column(Integer, unique=True, primary_key=True)
     cfg = Column(String)
 
+    def __init__(self, cfg):
+        self.cfg = cfg
+
 
 class Test(db.Model):
     '''Test'''
     __tablename__ = 'test'
     id = Column(Integer, unique=True, primary_key=True)
     cfg_id = Column(Integer, ForeignKey('test_cfg.id'), nullable=False)
-    owner = Column(Integer, ForeignKey('user.id'), nullable=False)
+    owner = Column(Integer, ForeignKey('user.id'))
     started_at = Column(DateTime)
     ended_at = Column(DateTime)
+
+    def __init__(self, cfg_id, owner=None, started_at=None):
+        self.cfg_id = cfg_id
+        if owner:
+            self.owner = owner
+        if not started_at:
+            self.started_at = datetime.utcnow()
+
+    def spread_fires(self):
+        cfg_json = Test_cfg.query.filter_by(id=self.cfg_id).first().cfg
+        cfg = json.loads(cfg_json)
+        host_from = Server.query.filter_by(fqdn=cfg['src_host']).first()
+        host_to = Server.query.filter_by(fqdn=cfg['addr'].split(':')[0]).first()
+        for f in cfg['fire']:
+            db.session.add(Fire(self.id, host_from, host_to))
+        db.session.commit()
+
 
 
 class Fire(db.Model):
@@ -120,3 +142,10 @@ class Fire(db.Model):
     ended_at = Column(DateTime)
     host_from = Column(Integer, ForeignKey('server.id'), nullable=False)
     host_to = Column(Integer, ForeignKey('server.id'), nullable=False)
+
+    def __init__(self, test_id, host_from, host_to, started_at=None):
+        self.test_id = test_id
+        self.host_from = host_from
+        self.host_to = host_to
+        if not started_at:
+            self.started_at = datetime.utcnow()
