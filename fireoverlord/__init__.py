@@ -39,7 +39,7 @@ login_manager.setup_app(app)
 
 @login_manager.user_loader
 def load_user(userid):
-    return User.query.filter_by(user_id=int(userid)).first()
+    return User.query.filter_by(id=int(userid)).first()
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -64,9 +64,7 @@ def admin_only():
         is_super = current_user.is_superuser
     except AttributeError:
         return False
-    return current_user.is_superuser and\
-        current_user.is_authenticated() and\
-        not current_user.is_anonymous()
+    return current_user.is_authenticated()
 
 
 class MyAdminIndexView(AdminIndexView):

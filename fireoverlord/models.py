@@ -17,7 +17,7 @@ from . import db
 class User(db.Model):
     '''Application user'''
     __tablename__ = 'user'
-    user_id = Column(Integer, autoincrement=True, primary_key=True)
+    id = Column(Integer, autoincrement=True, primary_key=True)
     username = Column(String, unique=True, nullable=False)
     first_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)
@@ -34,7 +34,7 @@ class User(db.Model):
         self.name = name
 
     def __repr__(self):
-        return '<User %s %s>' % (self.user_id, self.email)
+        return '<User %s %s>' % (self.id, self.email)
 
     def check_password(self, password):
         return self.password == password
@@ -43,7 +43,7 @@ class User(db.Model):
         return self.is_active
 
     def get_id(self):
-        return str(self.user_id).decode('utf-8')
+        return str(self.id).decode('utf-8')
 
     def is_authenticated(self):
         return self.is_authenticated
@@ -55,7 +55,7 @@ class User(db.Model):
 class Server(db.Model):
     '''Host which can be load generator and load target.'''
     __tablename__ = 'server'
-    server_id = Column(Integer, autoincrement=True, primary_key=True)
+    id = Column(Integer, autoincrement=True, primary_key=True)
     fqdn = Column(String, nullable=False)
     is_test = Column(Boolean, nullable=False)
     date_added = Column(DateTime)
@@ -87,8 +87,8 @@ class Line(db.Model):
 class Route(db.Model):
     '''Network route between two hosts.'''
     __tablename__ = 'route'
-    host_from = Column(Integer, ForeignKey('server.server_id'), nullable=False)
-    host_to = Column(Integer, ForeignKey('server.server_id'), nullable=False)
+    host_from = Column(Integer, ForeignKey('server.id'), nullable=False)
+    host_to = Column(Integer, ForeignKey('server.id'), nullable=False)
     hops_num = Column(Integer, default=None)
     line = Column(String, nullable=False)
     __table_args__ = (PrimaryKeyConstraint(host_from, host_to),)
@@ -106,7 +106,7 @@ class Test(db.Model):
     __tablename__ = 'test'
     id = Column(Integer, unique=True, primary_key=True)
     cfg_id = Column(Integer, ForeignKey('test_cfg.id'), nullable=False)
-    owner = Column(Integer, ForeignKey('user.user_id'), nullable=False)
+    owner = Column(Integer, ForeignKey('user.id'), nullable=False)
     started_at = Column(DateTime)
     ended_at = Column(DateTime)
 
@@ -118,5 +118,5 @@ class Fire(db.Model):
     test_id = Column(Integer, ForeignKey('test.id'), nullable=False)
     started_at = Column(DateTime)
     ended_at = Column(DateTime)
-    host_from = Column(Integer, ForeignKey('server.server_id'), nullable=False)
-    host_to = Column(Integer, ForeignKey('server.server_id'), nullable=False)
+    host_from = Column(Integer, ForeignKey('server.id'), nullable=False)
+    host_to = Column(Integer, ForeignKey('server.id'), nullable=False)
