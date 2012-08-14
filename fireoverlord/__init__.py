@@ -28,8 +28,8 @@ app.config.from_envvar('FIRE_OVR_CFG')
 app.wsgi_app = ProxyFix(app.wsgi_app)  # Fix for old proxyes
 db = SQLAlchemy(app)
 
-# Register different apps and extensions
-from models import User
+# Register different 3rd party apps and extensions
+from models import User, Server, Fire
 from forms import LoginForm
 
 # Flask-Login
@@ -60,47 +60,45 @@ def logout():
 
 
 # Flask-Admin
-def admin_only():
-    try:
-        is_super = current_user.is_superuser
-    except AttributeError:
-        return False
-    return current_user.is_authenticated()
+def is_admin():
+    if hasattr(current_user, 'is_superuser'):
+        return True
+    return False
 
 
 class MyAdminIndexView(AdminIndexView):
-    def is_accessible(self):
-        is_allowed = admin_only()
-        return is_allowed
+    pass
+
+MyAdminIndexView.is_accessible = staticmethod(is_admin)
 
 
 class MyView(BaseView):
-    def is_accessible(self):
-        is_allowed = admin_only()
-        return is_allowed
-
     @expose('/')
     def index(self):
         return self.render('index.html')
 
+MyView.is_accessible = staticmethod(is_admin)
+
 
 class ModelViewRestricted(ModelView):
-    def is_accessible(self):
-        is_allowed = admin_only()
-        return is_allowed
+    pass
 
+ModelViewRestricted.is_accessible = staticmethod(is_admin)
 
 admin = Admin(app, name='Firebat Admin', index_view=MyAdminIndexView())
 admin.add_view(MyView(name='Hello'))
 admin.add_view(ModelViewRestricted(User, db.session))
+admin.add_view(ModelViewRestricted(Server, db.session))
+admin.add_view(ModelViewRestricted(Fire, db.session))
 
 
 @app.route('/', methods=['GET'])
-@login_required
+#@login_required
 def index():
-    return 'Hello Worlds -->!'
+    return render_template('index.html', usr=current_user)
 
-#from status import status
+# fire-overlord sub apps
 from test import test
-#app.register_blueprint(status, url_prefix='/v1/status')
+from fire import fire
 app.register_blueprint(test, url_prefix='/v1/test')
+app.register_blueprint(fire, url_prefix='/v1/fire')

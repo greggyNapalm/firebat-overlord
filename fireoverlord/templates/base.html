@@ -39,12 +39,24 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </a>
-          <a class="brand" href="#">Firebat console</a>
+          <a class="brand" href="#">Firebat</a>
           <div class="nav-collapse">
             <ul class="nav">
               <li {% if detailde %}class="active"{% endif %}><a href="index.html">Quick</a></li>
               <li><a href="detailed.html">Deatiled</a></li>
               <li><a href="about.html">About</a></li>
+              {% if usr %}
+                {% if usr.is_superuser %}
+                  <li><a href="admin">Admin</a></li>
+                {% endif %}
+                {% if usr.is_authenticated() %}
+                  <li><a href="/logout">Logout</a></li>
+                {% else %}
+                  <li><a href="/login">Login</a></li>
+                {% endif %}
+              {% else %}
+                <li><a href="/login">Login</a></li>
+              {% endif %}
             </ul>
           </div><!--/.nav-collapse -->
         </div>

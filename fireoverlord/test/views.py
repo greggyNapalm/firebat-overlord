@@ -13,55 +13,50 @@ from firebat.console.helpers import validate as fb_validate
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
 
+import simplejson as json
+
 from .. import db
 from . import test
 from ..models import Test, Test_cfg, Fire   
-
+from ..helpers import validate_test
 
 @test.route('/hello', methods=['GET'])
 def test_hello():
     return 'Reply to hello'
 
 
-@test.route('/firebat', methods=['POST'])
+@test.route('/firebat', methods=['POST', 'PATCH'])
 def firebat():
-    '''Add new firebat test job'''
-    test_cfg = request.json
-    if not test_cfg:
+    '''Add or modify firebat test job'''
+    test = request.json
+    if not test:
         return 'JSON body malformed', 400
 
-    #try:
-    #    test_id = int(test['id'])
-    #except KeyError:
-    #    return 'Attribute *id* in JSON document is necessary', 400
-
-    #if Test.query.filter_by(id=test_id).first():
-    #    return 'Test with id=%s allready exist' % test_id, 400
+    import time
+    time.sleep(10)
 
     try:
-        fb_validate(test_cfg)
+        validate_test(test)
     except validictory.validator.ValidationError, e:
         return 'Test schema malformed: %s' % e, 400
 
-    cfg = Test_cfg(test_cfg)
-    test = Test(cfg.id)
-
-    db.session.add(t)
+    cfg = Test_cfg(json.dumps(test['cfg']))
+    db.session.add(cfg)
     db.session.commit()
 
-    #task = add.delay(4, 4)
-    base_path = current_app.config['TEST_BASE_PATH']
-    armorer_api_url = current_app.config['ARMORER_API_URL']
-    logs_path = current_app.config['TEST_LOGS_PATH']
-    task = launch_fire.delay(test_id, test, base_path,
-                             armorer_api_url=armorer_api_url,
-                             logs_path=logs_path)
-
-    t.celery_task_id = task.id
-    t.status_id = Status.query.filter_by(name='celery_assigned').first().id
+    if not 'owner' in test['cfg']:
+        owner = test['cfg']['uid']
+    test = Test(cfg.id, test['status'], owner=owner)
+    db.session.add(test)
     db.session.commit()
+    fires_ids = test.spread_fires()
+    
+    result = {
+        'test_id': test.id,
+        'fires_ids': fires_ids,
+    }
 
-    return 'Accepted', 201
+    return jsonify(result), 201
 #
 #
 #@test.route('/firebat/<test_id>', methods=['GET'])

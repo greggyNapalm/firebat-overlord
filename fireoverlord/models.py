@@ -32,8 +32,18 @@ class User(db.Model):
     last_login = Column(DateTime)
     date_joined = Column(DateTime)
 
-    def __init__(self, name=None):
-        self.name = name
+    def __init__(self, username, first_name, last_name, email, password,
+                 is_staff=None, is_active=None, is_superuser=None,
+                 is_authenticated=None):
+        self.username = username
+        self.first_name = first_name
+        self.last_name = last_name
+        self.email = email
+        self.password = password
+        self.is_staff = is_staff
+        self.is_active = is_active
+        self.is_superuser = is_superuser
+        self.is_authenticated = is_authenticated
 
     def __repr__(self):
         return '<User %s %s>' % (self.id, self.email)
@@ -55,20 +65,26 @@ class User(db.Model):
 
 
 class Server(db.Model):
-    '''Host which can be load generator and load target.'''
+    '''Hw or Vm host, can be load generator and load target.'''
     __tablename__ = 'server'
     id = Column(Integer, autoincrement=True, primary_key=True)
     fqdn = Column(String, nullable=False)
     is_test = Column(Boolean, nullable=False)
     date_added = Column(DateTime)
     description = Column(String)
-    last_ip = Column(postgresql.INET)
+    last_ip = Column(postgresql.INET, nullable=False)
     last_dc = Column(Integer, default=0)
     is_spec_tank = Column(Boolean, default=False)
     is_reachable = Column(Boolean, default=False)
     is_tank = Column(Boolean, default=False)
     line = Column(Integer, default=None)
     host_serv = Column(Integer, default=None)
+
+    def __init__(self, fqdn, last_ip, is_test=False,):
+        self.fqdn = fqdn
+        self.last_ip = last_ip
+        self.is_test = is_test
+        self.date_added = datetime.utcnow()
 
 
 class Dc(db.Model):
@@ -106,46 +122,76 @@ class Test_cfg(db.Model):
         self.cfg = cfg
 
 
+class TestStatus(db.Model):
+    '''Test status.'''
+    __tablename__ = 'test_status'
+    id = Column(Integer, unique=True, primary_key=True)
+    name = Column(String, nullable=False)
+    description = Column(String)
+
+    def __init__(self, name):
+        self.name = name
+
+
 class Test(db.Model):
     '''Test'''
     __tablename__ = 'test'
     id = Column(Integer, unique=True, primary_key=True)
+    status_id = Column(Integer, ForeignKey('test_status.id'), nullable=False)
     cfg_id = Column(Integer, ForeignKey('test_cfg.id'), nullable=False)
     owner = Column(Integer, ForeignKey('user.id'))
     started_at = Column(DateTime)
     ended_at = Column(DateTime)
 
-    def __init__(self, cfg_id, owner=None, started_at=None):
+    def __init__(self, cfg_id, status_id, owner=None, started_at=None):
         self.cfg_id = cfg_id
+        self.status_id = status_id
         if owner:
-            self.owner = owner
+            self.owner = User.query.filter_by(username=owner).first()
+        if not self.owner:
+            self.owner = 1
         if not started_at:
             self.started_at = datetime.utcnow()
 
     def spread_fires(self):
         cfg_json = Test_cfg.query.filter_by(id=self.cfg_id).first().cfg
         cfg = json.loads(cfg_json)
-        host_from = Server.query.filter_by(fqdn=cfg['src_host']).first()
-        host_to = Server.query.filter_by(fqdn=cfg['addr'].split(':')[0]).first()
+        host_from = Server.query.filter_by(fqdn=cfg['src_host']).first().id
+        fiers = []
+        status_created_id = TestStatus.query.filter_by(name='created').first().id
         for f in cfg['fire']:
-            db.session.add(Fire(self.id, host_from, host_to))
+            host_to = Server.query.filter_by(last_ip=f['addr'].split(':')[0]).\
+                      first().id
+            f = Fire(self.id, status_created_id, host_from, host_to)
+            db.session.add(f)
+            fiers.append(f)
         db.session.commit()
-
+        return [f.id for f in fiers]
 
 
 class Fire(db.Model):
     '''Test part, one Phantom job.'''
     __tablename__ = 'fire'
     id = Column(Integer, unique=True, primary_key=True)
+    status_id = Column(Integer, ForeignKey('test_status.id'), nullable=False)
     test_id = Column(Integer, ForeignKey('test.id'), nullable=False)
     started_at = Column(DateTime)
     ended_at = Column(DateTime)
     host_from = Column(Integer, ForeignKey('server.id'), nullable=False)
     host_to = Column(Integer, ForeignKey('server.id'), nullable=False)
+    cfg = Column(String)
 
-    def __init__(self, test_id, host_from, host_to, started_at=None):
+    def __init__(self, test_id, status_id, host_from, host_to, started_at=None):
         self.test_id = test_id
+        self.status_id = status_id
         self.host_from = host_from
         self.host_to = host_to
         if not started_at:
             self.started_at = datetime.utcnow()
+
+    def put_cfg(self, fire_cfg):
+        '''Create or update fire configuration.'''
+        if self.cfg:
+            self.cfg = json.dumps(json.loads(self.cfg).update(fire_cfg))
+        else:
+            self.cfg = json.dumps(fire_cfg)
