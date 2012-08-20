@@ -8,6 +8,7 @@ Objects mapping for whole app
 """
 
 from datetime import datetime
+import socket
 
 from sqlalchemy import *
 from sqlalchemy.dialects import postgresql
@@ -23,6 +24,7 @@ class User(db.Model):
     username = Column(String, unique=True, nullable=False)
     first_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)
+    settings = Column(String)
     email = Column(String, nullable=False)
     password = Column(String, nullable=False)
     is_staff = Column(Boolean, nullable=False)
@@ -85,6 +87,30 @@ class Server(db.Model):
         self.last_ip = last_ip
         self.is_test = is_test
         self.date_added = datetime.utcnow()
+
+    @classmethod
+    def get_or_create(cls, last_ip=None, fqdn=None, lookup_to=5):
+        if fqdn:
+            s = cls.query.filter_by(fqdn=fqdn).first()
+        elif last_ip:
+            s = cls.query.filter_by(last_ip=last_ip).first()
+        else:
+            raise ValueError(
+                    'At least one of kwargs: last_ip or fqdn shud present')
+        if not s:
+            invalid_names = ['any.yandex.ru',]
+            socket.setdefaulttimeout(lookup_to)
+            if fqdn:
+                last_ip = socket.gethostbyname(fqdn)
+
+            if not fqdn and last_ip:
+                fqdn = socket.gethostbyaddr(last_ip)[0]
+                if fqdn in invalid_names:
+                    raise ValueError('Can\'t resolve fqdn by last_ip: %s' % fqdn)
+            s = cls(fqdn, last_ip)
+            db.session.add(s)
+            db.session.commit()
+        return s
 
 
 class Dc(db.Model):
@@ -154,15 +180,15 @@ class Test(db.Model):
             self.started_at = datetime.utcnow()
 
     def spread_fires(self):
+        '''Create fires this test belong by test_cfg data.'''
         cfg_json = Test_cfg.query.filter_by(id=self.cfg_id).first().cfg
         cfg = json.loads(cfg_json)
-        host_from = Server.query.filter_by(fqdn=cfg['src_host']).first().id
+        host_from = Server.get_or_create(fqdn=cfg['src_host'])
         fiers = []
         status_created_id = TestStatus.query.filter_by(name='created').first().id
         for f in cfg['fire']:
-            host_to = Server.query.filter_by(last_ip=f['addr'].split(':')[0]).\
-                      first().id
-            f = Fire(self.id, status_created_id, host_from, host_to)
+            host_to = Server.get_or_create(last_ip=f['addr'].split(':')[0])
+            f = Fire(self.id, status_created_id, host_from.id, host_to.id)
             db.session.add(f)
             fiers.append(f)
         db.session.commit()
@@ -180,6 +206,7 @@ class Fire(db.Model):
     host_from = Column(Integer, ForeignKey('server.id'), nullable=False)
     host_to = Column(Integer, ForeignKey('server.id'), nullable=False)
     cfg = Column(String)
+    result = Column(String)
 
     def __init__(self, test_id, status_id, host_from, host_to, started_at=None):
         self.test_id = test_id

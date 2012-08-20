@@ -32,9 +32,6 @@ def firebat():
     if not test:
         return 'JSON body malformed', 400
 
-    import time
-    time.sleep(10)
-
     try:
         validate_test(test)
     except validictory.validator.ValidationError, e:
@@ -57,32 +54,3 @@ def firebat():
     }
 
     return jsonify(result), 201
-#
-#
-#@test.route('/firebat/<test_id>', methods=['GET'])
-#def firebat_c(test_id):
-#    '''Get firebat test state by id'''
-#    t = Test.query.filter_by(id=test_id).first()
-#    if not t:
-#        return 'No such test.', 404
-#
-#    if t.status_id == Status.query.filter_by(name='added').first().id:
-#        return 'Test was added, but task scheduling failed. Call support.', 410
-#
-#    if t.status_id == Status.query.filter_by(name='celery_assigned').\
-#                      first().id:
-#        r = launch_fire.AsyncResult(t.celery_task_id)
-#
-#        result = {
-#            'status': 'celery_assigned',
-#            'ready': r.ready(),
-#        }
-#
-#        if r.ready():
-#            try:
-#                result['result'] = r.get(timeout=5)
-#            except Exception, e:
-#                result['result'] = 'failed'
-#                result['failed_info'] = 'Celery task fails with: %s' % e
-#
-#    return jsonify(result)

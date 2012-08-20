@@ -31,7 +31,6 @@ class LoginForm(Form):
             self.username.errors.append('Unknown username')
             return False
 
-        print self.data
         if not user.check_password(self.password.data):
             self.password.errors.append('Invalid password')
             return False
