@@ -100,5 +100,5 @@ def index():
 # fire-overlord sub apps
 from test import test
 from fire import fire
-app.register_blueprint(test, url_prefix='/v1/test')
-app.register_blueprint(fire, url_prefix='/v1/fire')
+app.register_blueprint(test, url_prefix='/v1')
+#app.register_blueprint(fire, url_prefix='/v1/fire')

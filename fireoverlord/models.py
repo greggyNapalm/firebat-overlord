@@ -194,6 +194,29 @@ class Test(db.Model):
         db.session.commit()
         return [f.id for f in fiers]
 
+    @classmethod
+    def update(cls, test_diff):
+        t =  cls.query.filter_by(id=test_diff['id']).first()
+        if not t:
+            return None
+
+        for key, val in test_diff.items():
+            if key in t.__table__.columns:
+                #if key == 'result':
+                #    val = json.dumps(val) 
+                setattr(t, key, val)
+        db.session.add(t)
+        db.session.commit()
+
+    def as_dict(self):
+        result = {}
+        for key in self.__table__.columns:
+            val = getattr(self, key.name)
+            if isinstance(val, datetime):
+                val = val.isoformat()
+            result[key.name] = val
+        return result
+
 
 class Fire(db.Model):
     '''Test part, one Phantom job.'''
@@ -215,6 +238,20 @@ class Fire(db.Model):
         self.host_to = host_to
         if not started_at:
             self.started_at = datetime.utcnow()
+
+    @classmethod
+    def update(cls, fire_up):
+        f =  cls.query.filter_by(id=fire_up['id']).first()
+        if not f:
+            return None
+
+        for key, val in fire_up.items():
+            if key in f.__table__.columns:
+                if key == 'result':
+                    val = json.dumps(val) 
+                setattr(f, key, val)
+        db.session.add(f)
+        db.session.commit()
 
     def put_cfg(self, fire_cfg):
         '''Create or update fire configuration.'''

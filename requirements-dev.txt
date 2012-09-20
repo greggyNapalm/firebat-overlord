@@ -10,4 +10,6 @@ redis==2.6.0
 celery==3.0.5
 psycopg2==2.4.5
 Flask-Admin==1.0.1
-#-e git://github.com/greggyNapalm/firebat-console.git@d4898caa8fe0ee1436025196b530b3b4d5c841ac#egg=firebat_console-dev
+simplejson==2.6.1
+validictory==0.8.3
+#-e git://github.com/greggyNapalm/firebat-console.git@30b959a84f5d82a5e6a80c9778bf95c07f65f7a9#egg=firebat_console-dev
