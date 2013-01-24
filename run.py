@@ -9,6 +9,10 @@ Launch single instance of app with debug and autoreload on changes.
 """
 
 import sys
+
+from werkzeug.contrib.profiler import ProfilerMiddleware
+from werkzeug.contrib import profiler
+
 from fireoverlord import app
 
 
@@ -23,7 +27,9 @@ def main():
 
         port = int(port)
 
+    
     app.run(debug=True, host=host, port=port)
+    #action_profile = profiler.make_action(app)
 
 if __name__ == '__main__':
     main()

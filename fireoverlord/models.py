@@ -26,7 +26,8 @@ class User(db.Model):
     last_name = Column(String, nullable=False)
     settings = Column(String)
     email = Column(String, nullable=False)
-    password = Column(String, nullable=False)
+    #password = Column(String, nullable=False)
+    password = Column(String)
     is_staff = Column(Boolean, nullable=False)
     is_active = Column(Boolean, nullable=False)
     is_superuser = Column(Boolean, nullable=False)
@@ -34,9 +35,9 @@ class User(db.Model):
     last_login = Column(DateTime)
     date_joined = Column(DateTime)
 
-    def __init__(self, username, first_name, last_name, email, password,
+    def __init__(self, username, first_name, last_name, email, password=None,
                  is_staff=None, is_active=None, is_superuser=None,
-                 is_authenticated=None):
+                 is_authenticated=None, date_joined=None):
         self.username = username
         self.first_name = first_name
         self.last_name = last_name
@@ -46,6 +47,7 @@ class User(db.Model):
         self.is_active = is_active
         self.is_superuser = is_superuser
         self.is_authenticated = is_authenticated
+        self.date_joined = date_joined
 
     def __repr__(self):
         return '<User %s %s>' % (self.id, self.email)
@@ -64,6 +66,24 @@ class User(db.Model):
 
     def is_anonymous(self):
         return False
+
+    @classmethod
+    def create_if_not_exists(cls, username):
+        if not cls.query.filter_by(username=username).first():
+            u = cls(username, 'fix', 'fix', 'fix', is_staff=True,
+                    is_active=True, is_superuser=False, is_authenticated=True,
+                    date_joined=datetime.utcnow())
+            db.session.add(u)
+            db.session.commit()
+        return False
+
+
+    def update(self, **kwargs):
+        invalid_fields = ['id', ]
+
+        for key, val in kwargs.iteritems(): 
+            if key in self.__table__.columns and key not in invalid_fields:
+                setattr(self, key, val)
 
 
 class Server(db.Model):
@@ -98,7 +118,7 @@ class Server(db.Model):
             raise ValueError(
                     'At least one of kwargs: last_ip or fqdn shud present')
         if not s:
-            invalid_names = ['any.yandex.ru',]
+            invalid_names = ['any.yandex.ru', ]
             socket.setdefaulttimeout(lookup_to)
             if fqdn:
                 last_ip = socket.gethostbyname(fqdn)
@@ -173,9 +193,9 @@ class Test(db.Model):
         self.cfg_id = cfg_id
         self.status_id = status_id
         if owner:
-            self.owner = User.query.filter_by(username=owner).first()
+            self.owner = User.query.filter_by(username=owner).first().id
         if not self.owner:
-            self.owner = 1
+            self.owner = 1 # *admin* user if field is empty 
         if not started_at:
             self.started_at = datetime.utcnow()
 
@@ -259,3 +279,29 @@ class Fire(db.Model):
             self.cfg = json.dumps(json.loads(self.cfg).update(fire_cfg))
         else:
             self.cfg = json.dumps(fire_cfg)
+
+
+class Permission(db.Model):
+    '''Permission levels.'''
+    __tablename__ = 'permission'
+    id = Column(Integer, unique=True, primary_key=True)
+    description = Column(String)
+    
+    def __init__(self, description):
+        self.description = description
+
+
+class Token(db.Model):
+    '''Token for REST API clients authentication.'''
+    __tablename__ = 'token'
+    id = Column(Integer, unique=True, primary_key=True)
+    value = Column(String, nullable=False)
+    responsible = Column(Integer, ForeignKey('user.id'))
+    lvl = Column(Integer, ForeignKey('permission.id'))
+    description = Column(String)
+    
+    def __init__(self, value, responsible, lvl, description):
+        self.value = value
+        self.responsible = responsible
+        self.lvl = lvl
+        self.description = description

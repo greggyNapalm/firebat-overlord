@@ -1,0 +1,18 @@
+CELERY_IMPORTS = ("tasks", )
+
+BROKER_URL = 'redis://127.0.0.1:6379/1'
+
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/1'
+CELERY_TASK_RESULT_EXPIRES = 604800  # 1 weak.
+
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_ENABLE_UTC = True
+
+CELERY_SEND_TASK_ERROR_EMAILS = True
+ADMINS = (
+    ("fire-dev", "some@email.addr"),
+)
+SERVER_EMAIL = "send-from@email.addr"
+EMAIL_HOST = "127.0.0.1"
+EMAIL_PORT = 25

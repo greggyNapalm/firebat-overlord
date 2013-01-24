@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
 import sys
 
 if not hasattr(sys, 'version_info') or sys.version_info < (2, 7, 0, 'final'):

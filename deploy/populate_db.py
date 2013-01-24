@@ -16,11 +16,13 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 from fireoverlord import db
 from fireoverlord.models import User, Server, Line, Route, Dc, Test_cfg,\
-        Test, Fire, TestStatus
+        Test, Fire, TestStatus, Permission, Token
 
 
 def main():
     db.create_all()
+
+    # Default test statuses.
     test_statuses = [
         TestStatus('created'),
         TestStatus('started'),
@@ -32,18 +34,34 @@ def main():
     for ts in test_statuses:
         db.session.add(ts)
 
-    admin = User('admin', 'admin', 'admin', 'admin@localhost.io', 'changeme',
-                 is_staff=True, is_active=True, is_superuser=True,
-                 is_authenticated=True)
+    # At least one admin account at the begining.
+    admin = User('admin', 'admin', 'admin', 'admin@localhost.io',
+                 password='changeme', is_staff=True, is_active=True,
+                 is_superuser=True, is_authenticated=True)
 
     db.session.add(admin)
 
+    # Not necessary
     servers = [
         Server('localhost', '127.0.0.1', is_test=False),
-        Server('lucid.t80.tanks.yandex.net', '84.201.161.219', is_test=False),
     ]
     for s in servers:
         db.session.add(s)
+
+    # Dfault permissions for API clients.
+    perms = [
+        Permission('ro - read only'),
+        Permission('rwo - read and write'),
+        Permission('rwd - read, write and delete'),
+    ]
+
+    for p in perms:
+        db.session.add(p)
+
+    # Test API client.
+    db.session.commit()
+    db.session.add(Token('valera', admin.id, perms[0].id,
+                         'test RO token for admin'))
 
     db.session.add(admin)
     db.session.commit()
