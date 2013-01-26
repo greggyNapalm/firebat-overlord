@@ -11,30 +11,7 @@
         body {
             padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
         }
-
-        /* header tooltips doesn't work
-        li[rel="tooltip"] {
-            background: #0088CC;
-            border-radius:10px;
-            color: #fff;
-            font-size: 10px;
-            vertical-align:top;
-            font-weight:bold;
-            line-height:10px;
-            margin: 0 6px 0 2px;
-        }
-
-        .navbar .nav li[rel="tooltip"] a {
-            color: #FFFFFF;
-            padding: 4px;
-            text-shadow: none;
-        }
-        
-        .navbar .nav li[rel="tooltip"] a .icon-large:before {
-            width: auto;
-        }
-        */
-    </style>
+        </style>
 </head>
 
 <body>
@@ -121,7 +98,6 @@
       <li><a href="#">by Tag</a></li>
       <li><a href="#">All</a></li>
     </ul>
-
     <table class="table table-bordered table-striped">
       <thead>
         <tr>
@@ -175,12 +151,11 @@
   </div>
 </script>
 
+<!-- Templates -->
 <!--
-<script id="userTemplate" type="text/x-handlebars">
-  <img {{bindAttr src="Firebat.Settings.avatarURL"}} height="28" width="28" style="border-radius: 4px">
-  {{ Firebat.Settings.data.login }}
-</script>
+<script id="tanksTemplate" type="text/x-handlebars" src="static/tmpl/tanksTemplate.hbs"></script>
 -->
+
 <!-- 3rd party js libs -->
 <script src="static/js/3d_party/jquery-1.8.3.min.js"></script>
 <script src="static/js/3d_party/bootstrap.min.js"></script>
@@ -190,21 +165,11 @@
 <script src="static/js/3d_party/handlebars-1.0.rc.1.js"></script>
 <script src="static/js/3d_party/ember-1.0.0-pre.2.min.js"></script>
 
-<!-- emberjs app -->
+<!-- Firebat app -->
+<script src="static/js/app/const.js"></script>
+<script src="static/js/app/helpers.js"></script>
+<script src="static/js/app/ya.js"></script>
 <script src="static/js/app/app.js"></script>
-<!--
-<script src="static/js/app/router.js"></script>
-<script src="static/js/app/models/store.js"></script>
-<script src="static/js/app/models/todo.js"></script>
-<script src="static/js/app/controllers/entries.js"></script>
-<script src="static/js/app/controllers/todos.js"></script>
-<script src="static/js/app/views/application.js"></script>
-<script src="static/js/app/views/todos.js"></script>
--->
-<!-- tmpl -->
-<!--
-<script type="text/x-handlebars" data-template-name="application" src="static/js/app/tmpl/check.tmpl"></scrihtm
-<script type="text/x-handlebars" id="statsTemplate" src="static/js/app/tmpl/check.tmpl"></script>
--->
+
 </body>
 </html>

@@ -1,0 +1,55 @@
+<div class="container">
+  <h1>Tests</h1>
+  <a {{action "reload" target="Firebat.router.testsController" on="click"}}><i class="icon-refresh icon-large"></i></a>
+  <ul class="nav nav-tabs">
+    <li class="active">
+      <a href="#">Mine</a>
+    </li>
+    <li><a href="#">by Tag</a></li>
+    <li><a href="#">All</a></li>
+  </ul>
+  <table class="table table-bordered table-striped">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Status</th>
+        <th>Task</th>
+        <th>Started at</th>
+        <th>Ended at</th>
+        <th>Tags</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each item in Firebat.router.testsController}}
+        <tr>
+          <td>{{item.title.test_name}}</td>
+          <td>{{item.status_name}}</td>
+          <td>{{item.title.task}}</td>
+          <td>{{item.started_at_pp}}</td>
+          <td>{{item.ended_at_pp}}</td>
+          <td>
+            {{#each tag in item.tags}}
+              <span class="label label-info">{{tag}}</span>
+            {{/each}}
+          </td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+  <ul class="pager">
+    <li {{bindAttr class=":next Firebat.TestsPaginator.olderDisabled:disabled"}}>
+      {{#unless Firebat.TestsPaginator.olderDisabled}}
+        <a {{action "goToPage" target="Firebat.router.testsController"}} name="next" href="next">Older &rarr;</a>
+      {{else}}
+        <a>Older &rarr;</a>
+      {{/unless}}
+    </li>
+    <li {{bindAttr class=":previous Firebat.TestsPaginator.newerDisabled:disabled"}}>
+      {{#unless Firebat.TestsPaginator.newerDisabled}}
+        <a {{action "goToPage" target="Firebat.router.testsController"}} name="prev" href="prev">&larr; Newer</a>
+      {{else}}
+        <a>&larr; Newer</a>
+      {{/unless}}
+    </li>
+  </ul>
+</div>
