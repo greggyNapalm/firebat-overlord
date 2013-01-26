@@ -2,7 +2,7 @@
 module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib');
     grunt.loadNpmTasks('grunt-ember-handlebars');
-    grunt.loadNpmTasks('grunt-shell');
+    //grunt.loadNpmTasks('grunt-shell');
     grunt.loadNpmTasks('grunt-templater');
 
     var js_3rd_party = [
