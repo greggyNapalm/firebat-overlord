@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Firebat Web UI</title>
+    <title>**Dev Firebat Web UI**</title>
     <meta name="description" content="">
     <meta name="author" content="">
     <link href="static/css/bootstrap.css" rel="stylesheet">
@@ -15,161 +15,49 @@
 </head>
 
 <body>
-<section id="firebat_app"></section>
-<script id="headerTemplate" type="text/x-handlebars">
-<div class="navbar navbar-fixed-top">
-  <div class="navbar-inner">
-    <div class="container">
-      <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </a>
-      <a class="brand" href="#">Firebat</a>
-      <div class="nav-collapse" style="overflow:hidden;">
-        <ul class="nav links">
-          <li><a {{action showTests href=true}}>Tests</a></li>
-          <li><a {{action showTanks href=true}}>Tanks</a></li>
-          {{#if Firebat.Settings.data.is_superuser}}
-            <li><a href="/admin/">Admin</a></li>
-          {{/if}}
-        </ul>
-        <ul class="nav secondary-nav" style="float:right;">
-          <li><img {{bindAttr src="Firebat.Settings.avatarURL"}} height="28" width="28" style="border-radius: 4px"> {{ Firebat.Settings.data.login }}</li>
-          <li rel="tooltip" data-title="Settings"><a {{action showSettings href=true}}><i class="icon-cogs icon-large"></i></a></li>
-          <li rel="tooltip" data-title="Sign Out"><a {{bindAttr href="logoutLink"}}><i class="icon-signout icon-large"></i></a></li>
-        </ul>
-      </div><!--/.nav-collapse -->
-    </div>
-  </div>
-</div>
-</script>
-
-<script id="mainTemplate" type="text/x-handlebars">
-  {{outlet main}}
-</script>
-
-<script id="fotterTemplate" type="text/x-handlebars">
-  <div class="container navbar navbar-fixed-bottom">
-    <hr>
-    <ul class="inline footer-links">
-      <li><a href="https://github.com/greggyNapalm/firebat-overlord">GitHub</a></li>
-      <li class="muted">&middot;</li>
-      <li><a href="https://github.com/greggyNapalm/firebat-overlord/issues">Issues</a></li>
-      <li>
-    </ul>
-  </div>
-</script>
-
-<script id="settingsTemplate" type="text/x-handlebars">
-  <div class="container">
-    <table class="table table-bordered table-striped">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Value</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>fetched_at</td>
-          <td>{{Firebat.Settings.fetched_hum}}</td>
-        </tr>
-        <tr>
-          <td>login</td>
-          <td>{{Firebat.Settings.data.login}}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</script>
-
-<script id="testsTemplate" type="text/x-handlebars">
-  Hello, this is Test
-</script>
-<script id="testsTemplate" type="text/x-handlebars">
-  <div class="container">
-    <h1>Tests</h1>
-    <a {{action "reload" target="Firebat.router.testsController" on="click"}}><i class="icon-refresh icon-large"></i></a>
-    <ul class="nav nav-tabs">
-      <li class="active">
-        <a href="#">Mine</a>
-      </li>
-      <li><a href="#">by Tag</a></li>
-      <li><a href="#">All</a></li>
-    </ul>
-    <table class="table table-bordered table-striped">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Status</th>
-          <th>Task</th>
-          <th>Started at</th>
-          <th>Ended at</th>
-          <th>Tags</th>
-        </tr>
-      </thead>
-      <tbody>
-        {{#each item in Firebat.router.testsController}}
-          <tr>
-            <td>{{item.title.test_name}}</td>
-            <td>{{item.status_name}}</td>
-            <td>{{item.title.task}}</td>
-            <td>{{item.started_at_pp}}</td>
-            <td>{{item.ended_at_pp}}</td>
-            <td>
-              {{#each tag in item.tags}}
-                <span class="label label-info">{{tag}}</span>
-              {{/each}}
-            </td>
-          </tr>
-        {{/each}}
-      </tbody>
-    </table>
-    <ul class="pager">
-      <li {{bindAttr class=":next Firebat.TestsPaginator.olderDisabled:disabled"}}>
-        {{#unless Firebat.TestsPaginator.olderDisabled}}
-          <a {{action "goToPage" target="Firebat.router.testsController"}} name="next" href="next">Older &rarr;</a>
-        {{else}}
-          <a>Older &rarr;</a>
-        {{/unless}}
-      </li>
-      <li {{bindAttr class=":previous Firebat.TestsPaginator.newerDisabled:disabled"}}>
-        {{#unless Firebat.TestsPaginator.newerDisabled}}
-          <a {{action "goToPage" target="Firebat.router.testsController"}} name="prev" href="prev">&larr; Newer</a>
-        {{else}}
-          <a>&larr; Newer</a>
-        {{/unless}}
-      </li>
-    </ul>
-  </div>
-</script>
-
-<script id="tanksTemplate" type="text/x-handlebars">
-  <div class="container">
-    <h1>Tanks</h1>
-  </div>
-</script>
-
-<!-- Templates -->
-<!--
-<script id="tanksTemplate" type="text/x-handlebars" src="static/tmpl/tanksTemplate.hbs"></script>
--->
-
 <!-- 3rd party js libs -->
 <script src="static/js/3d_party/jquery-1.8.3.min.js"></script>
 <script src="static/js/3d_party/bootstrap.min.js"></script>
 <script src="static/js/3d_party/bootstrap-dropdown.js"></script>
 <script src="static/js/3d_party/bootstrap-tooltip.js"></script>
 <script src="static/js/3d_party/mousetrap.min.js"></script>
-<script src="static/js/3d_party/handlebars-1.0.rc.1.js"></script>
-<script src="static/js/3d_party/ember-1.0.0-pre.2.min.js"></script>
+<script src="static/js/3d_party/handlebars-1.0.rc.2.js"></script>
+<script src="static/js/3d_party/ember-1.0.0-pre.4.min.js"></script>
 
 <!-- Firebat app -->
 <script src="static/js/app/const.js"></script>
 <script src="static/js/app/helpers.js"></script>
 <script src="static/js/app/ya.js"></script>
-<script src="static/js/app/app.js"></script>
+
+
+<!-- Load templates with AJAX and start Ember app after -->
+<script>
+  var app_script_url = 'static/js/app/app.js';
+  var templates = ['application', 'settingsTemplate', 'testsTemplate', 'testTemplate', 'tanksTemplate'],
+      requests = [];
+  
+  $.each(templates, function(index, template) {
+      requests.push(
+          $.ajax({
+              url : 'static/tmpl/' + template + '.hbs',
+              dataType : 'text',
+              success : function(templateSrc) {
+                  Em.TEMPLATES[template] = Em.Handlebars.compile(templateSrc);
+              }
+          })
+      );
+  });
+  
+  $.when(requests).then(function() {
+      console.log('Tempates loaded');
+      var headID = document.getElementsByTagName("head")[0];         
+      var newScript = document.createElement('script');
+      newScript.type = 'text/javascript';
+      newScript.src = 'static/js/app/app.js';
+      headID.appendChild(newScript);
+  });
+</script>
+
 
 </body>
 </html>

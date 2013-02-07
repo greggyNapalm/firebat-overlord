@@ -1,5 +1,8 @@
 /* JSHint strict mode tweak */
 /*global $:false */
+/*global ya:false */
+/*global helpers:false */
+/*global CONST:false */
 /*global Firebat:false */
 /*global Ember:false */
 /*global Mousetrap:false */
@@ -11,22 +14,23 @@
 
 	win.Firebat = Ember.Application.create({
 		VERSION: '1.0',
-		rootElement: '#firebat_app',
 		storeNamespace: 'firebat-emberjs',
 		ApplicationController: Ember.Controller.extend({
+		//ApplicationController: Ember.ObjectController.extend({
+            needs: ['settings', 'tests'],
+            prefetch: function() {
+                this.get('controllers.settings').fetch();
+            },
             logoutLink: ya.getLogoutLink()
         }),
 		ready: function() {
             console.log("App loaded.");
 			this.initialize();
-            this.router.settingsController.fetch();
-            this.router.testsController.goToPage();
-            Mousetrap.bind('ctrl+right', function() {
-                Firebat.router.testsController.goToPage('next');
-            });
-            Mousetrap.bind('ctrl+left', function() {
-                Firebat.router.testsController.goToPage('prev');
-            });
+            //this.ApplicationController.prefetch();
+            //this.get('controllers.settings').fetch();
+            // Async fetch settings and tests data
+            //this.router.settingsController.fetch();
+            //this.router.testsController.goToPage();
 		}
 	});
 
@@ -37,37 +41,21 @@
 (function( app ) {
 	'use strict';
 
-    var ApplicationView = Ember.ContainerView.extend({
-        childViews: [ 'headerView', 'mainView', 'footerView' ],
-        //headerView: Ember.ContainerView.create({
-        headerView: Ember.View.create({
-            elementId: 'header',
-            classNames: ['app-header'],
-            templateName: 'headerTemplate'
-        }),
-        //mainView: Em.ContainerView.create({
-        mainView: Ember.View.create({
-            elementId: 'main',
-            classNames: ['app-main'],
-            templateName: 'mainTemplate'
-        }),
-        //footerView: Ember.ContainerView.create({
-        footerView: Ember.View.create({
-            elementId: 'fotter',
-            classNames: ['app-fotter'],
-            templateName: 'fotterTemplate'
-        })
-	});
-
-    //var UserView = Ember.View.extend({
-    //    templateName:  'userTemplate'
-    //});
-
     var SettingsView = Ember.View.extend({
         templateName:  'settingsTemplate'
     });
     var TestsView = Ember.View.extend({
-        templateName:  'testsTemplate'
+        templateName:  'testsTemplate',
+        didInsertElement: function() {
+            Mousetrap.bind('ctrl+right', function() {
+                //this.get('controller').goToPage('next');
+                this.get('controller').echo();
+                console.log('Got it!');
+            });
+        },
+        wilLRemoveElement: function() {
+            Mousetrap.unbind('ctrl+right');
+        }
     });
     var TestView = Ember.View.extend({
         templateName:  'testTemplate'
@@ -76,8 +64,6 @@
         templateName:  'tanksTemplate'
     });
 
-
-	app.ApplicationView = ApplicationView;
     app.SettingsView = SettingsView;
     app.TestsView = TestsView;
     app.TestView = TestView;
@@ -96,7 +82,7 @@
         avatarURL: null,
         data: null,
         update: function(data) {
-            console.info('Settings model update fired');
+            //console.info('Settings model update fired');
             this.fetched_at = helpers.epoach();
             this.set('fetched_hum', Date());
             this.set("data", data);
@@ -175,8 +161,11 @@
     });
 
     var TestsController = Ember.ArrayController.extend({
+        echo: function() {
+            console.log('EHLO...');
+        },
         reload: function() {
-            console.info('Reloading *tests* data from server side.');
+            //console.info('Reloading *tests* data from server side.');
             app.TestsPaginator.reset();
             this.goToPage();
         },
@@ -250,7 +239,7 @@
             }
             url = app.TestsPaginator.header[direction].url;
           }
-          console.info("goto: ", url);
+          //console.info("goto: ", url);
           this.fetch(url);
         }
     });
@@ -265,49 +254,18 @@
 (function( app ) {
 	'use strict';
 
-	var Router = Ember.Router.extend({
-		root: Ember.Route.extend({
-			showTests: Ember.Route.transitionTo( 'tests' ),
-			showTanks: Ember.Route.transitionTo( 'tanks' ),
-			showSettings: Ember.Route.transitionTo( 'settings' ),
-
-			index: Ember.Route.extend({
-                route:  '/',
-                redirectsTo: 'tests'
-            }),
-            tests: Ember.Route.extend({
-                route:  '/tests',
-                enter: function ( router ){
-                    console.info('context -> tests');
-                },
-                connectOutlets:  function(router, context){
-                    router.get('applicationController').connectOutlet('main', 'Tests');
-                }
-            }),
-            test: Ember.Route.extend({
-                route:  '/test/:test_id',
-                connectOutlets:  function(router, context){
-                    router.get('applicationController').connectOutlet('main', 'Test');
-                }
-            }),
-            settings: Ember.Route.extend({
-                route:  '/settings',
-                enter: function ( router ){
-                    console.log("Entrering in *settings* state.");
-                },
-                connectOutlets:  function(router, context){
-                    router.get('applicationController').connectOutlet('main', 'Settings');
-                }
-            }),
-            tanks: Ember.Route.extend({
-                route:  '/tanks',
-                connectOutlets:  function(router, context){
-                    router.get('applicationController').connectOutlet('main', 'Tanks');
-                }
-            })
-        })
+    app.Router.map(function() {
+        this.route("tanks");
+        this.route("settings");
+        this.route("tests");
+        this.resource('test', { path: '/test/:test_id' }, function() {
+        });
     });
 
-	app.Router = Router;
-
+    app.IndexRoute = Ember.Route.extend({
+        redirect: function() {
+            this.transitionTo('tests');
+        }
+    });
+    
 })( window.Firebat );
