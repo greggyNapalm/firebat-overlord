@@ -14,23 +14,21 @@
 
 	win.Firebat = Ember.Application.create({
 		VERSION: '1.0',
+        Store: DS.Store.extend({
+            revision: 11
+        }),
 		storeNamespace: 'firebat-emberjs',
 		ApplicationController: Ember.Controller.extend({
-		//ApplicationController: Ember.ObjectController.extend({
             needs: ['settings', 'tests'],
             prefetch: function() {
-                this.get('controllers.settings').fetch();
+                var self = this;
+                self.get('controllers.settings').fetch();
+                self.get('controllers.tests').goToPage();
             },
             logoutLink: ya.getLogoutLink()
         }),
 		ready: function() {
-            console.log("App loaded.");
 			this.initialize();
-            //this.ApplicationController.prefetch();
-            //this.get('controllers.settings').fetch();
-            // Async fetch settings and tests data
-            //this.router.settingsController.fetch();
-            //this.router.testsController.goToPage();
 		}
 	});
 
@@ -41,20 +39,32 @@
 (function( app ) {
 	'use strict';
 
+    var ApplicationView = Ember.View.extend({
+        templateName:  'application',
+        didInsertElement: function() {
+            var self = this;
+            self.get('controller').prefetch();
+        }
+    });
+
     var SettingsView = Ember.View.extend({
         templateName:  'settingsTemplate'
     });
     var TestsView = Ember.View.extend({
         templateName:  'testsTemplate',
         didInsertElement: function() {
+            var self = this;
+             self.get('controller').goToPage();
             Mousetrap.bind('ctrl+right', function() {
-                //this.get('controller').goToPage('next');
-                this.get('controller').echo();
-                console.log('Got it!');
+                self.get('controller').goToPage('next');
+            });
+            Mousetrap.bind('ctrl+left', function() {
+                self.get('controller').goToPage('prev');
             });
         },
         wilLRemoveElement: function() {
             Mousetrap.unbind('ctrl+right');
+            Mousetrap.unbind('ctrl+left');
         }
     });
     var TestView = Ember.View.extend({
@@ -64,6 +74,7 @@
         templateName:  'tanksTemplate'
     });
 
+    app.ApplicationView = ApplicationView;
     app.SettingsView = SettingsView;
     app.TestsView = TestsView;
     app.TestView = TestView;
@@ -91,6 +102,7 @@
     });
 
     app.Test = Ember.Object.extend({
+    //app.Test = DS.Model.extend({
         /* Load test entrie */
         started_at: null,
         ended_at: null,
@@ -105,7 +117,6 @@
         pages: [],
         header: null,
         perPage: null,
-        //currPage: null,
         newerDisabled: false,
         olderDisabled: false,
         update: function(data) {
@@ -161,6 +172,15 @@
     });
 
     var TestsController = Ember.ArrayController.extend({
+        needs: [''],
+        newerDisabled: function() {
+            return app.TestsPaginator.newerDisabled;
+        }.property('content.newerDisabled'),
+        olderDisabled: function() {
+            return app.TestsPaginator.olderDisabled;
+        }.property('content.olderDisabled'),
+        nextStr: 'next',
+        prevStr: 'prev',
         echo: function() {
             console.log('EHLO...');
         },
@@ -221,26 +241,26 @@
           });
         },
         goToPage: function(v) {
-          var self = this;
-          var url ='';
-          var defaultParams = {
-            'owner': 'gkomissarov',
-            'per_page': app.TestsPaginator.perPage || CONST.get('TEST_PER_PAGE')
-          };
+            var self = this;
+            var url ='';
+            var defaultParams = {
+                'owner': 'gkomissarov',
+                'per_page': app.TestsPaginator.perPage || CONST.get('TEST_PER_PAGE')
+            };
 
-          if (typeof v == 'undefined') {
-            url = [CONST.get('API_BASE_PATH'), 'test?', $.param(defaultParams)].join('');
-          } else {
-            var direction = '';
-            if (typeof v == 'string' || v instanceof String) {
-                direction = v;
+            if (typeof v == 'undefined') {
+                url = [CONST.get('API_BASE_PATH'), 'test?', $.param(defaultParams)].join('');
             } else {
-                direction = v.srcElement.name;
+                var direction = '';
+                if (typeof v == 'string' || v instanceof String) {
+                    direction = v;
+                } else {
+                    // old Emberjs version workaround
+                    direction = v.srcElement.name;
+                }
+                url = app.TestsPaginator.header[direction].url;
             }
-            url = app.TestsPaginator.header[direction].url;
-          }
-          //console.info("goto: ", url);
-          this.fetch(url);
+            this.fetch(url);
         }
     });
 
@@ -261,6 +281,12 @@
         this.resource('test', { path: '/test/:test_id' }, function() {
         });
     });
+
+    //app.TestRoute = Ember.Route.extend({
+    //  model: function(params) {
+    //    return app.Test.find({ id: params.post_id });
+    //  }
+    //});
 
     app.IndexRoute = Ember.Route.extend({
         redirect: function() {

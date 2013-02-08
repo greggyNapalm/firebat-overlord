@@ -1,6 +1,6 @@
 <div class="container">
   <h1>Tests</h1>
-  <a {{action "reload" target="Firebat.router.testsController" on="click"}}><i class="icon-refresh icon-large"></i></a>
+  <a {{action "reload"  on="click"}}><i class="icon-refresh icon-large"></i></a>
   <ul class="nav nav-tabs">
     <li class="active">
       <a href="#">Mine</a>
@@ -20,7 +20,7 @@
       </tr>
     </thead>
     <tbody>
-      {{#each item in Firebat.router.testsController}}
+      {{#each item in controller}}
         <tr>
           <td>{{item.title.test_name}}</td>
           <td>{{item.status_name}}</td>
@@ -37,16 +37,16 @@
     </tbody>
   </table>
   <ul class="pager">
-    <li {{bindAttr class=":next Firebat.TestsPaginator.olderDisabled:disabled"}}>
-      {{#unless Firebat.TestsPaginator.olderDisabled}}
-        <a {{action "goToPage" target="Firebat.router.testsController"}} name="next" href="next">Older &rarr;</a>
+    <li {{bindAttr class=":next olderDisabled:disabled"}}>
+      {{#unless olderDisabled}}
+        <a {{action "goToPage" nextStr}} href="next">Older &rarr;</a>
       {{else}}
         <a>Older &rarr;</a>
       {{/unless}}
     </li>
-    <li {{bindAttr class=":previous Firebat.TestsPaginator.newerDisabled:disabled"}}>
-      {{#unless Firebat.TestsPaginator.newerDisabled}}
-        <a {{action "goToPage" target="Firebat.router.testsController"}} name="prev" href="prev">&larr; Newer</a>
+    <li {{bindAttr class=":previous newerDisabled:disabled"}}>
+      {{#unless newerDisabled}}
+        <a {{action "goToPage" prevStr}} href="prev">&larr; Newer</a>
       {{else}}
         <a>&larr; Newer</a>
       {{/unless}}
