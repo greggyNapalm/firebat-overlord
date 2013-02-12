@@ -13,11 +13,10 @@
 	'use strict';
 
 	win.Firebat = Ember.Application.create({
-		VERSION: '1.0',
+        LOG_TRANSITIONS:true,
         Store: DS.Store.extend({
             revision: 11
         }),
-		storeNamespace: 'firebat-emberjs',
 		ApplicationController: Ember.Controller.extend({
             needs: ['settings', 'tests'],
             prefetch: function() {
@@ -54,7 +53,13 @@
         templateName:  'testsTemplate',
         didInsertElement: function() {
             var self = this;
-             self.get('controller').goToPage();
+            console.info(self.get('controller'));
+            //if (!(app.TestsPaginator.header)) {
+            //    console.info('Emptie');
+            //    self.get('controller').goToPage();
+            //}
+            //console.info(app.TestsPaginator.header);
+            self.get('controller').goToPage();
             Mousetrap.bind('ctrl+right', function() {
                 self.get('controller').goToPage('next');
             });
@@ -102,7 +107,6 @@
     });
 
     app.Test = Ember.Object.extend({
-    //app.Test = DS.Model.extend({
         /* Load test entrie */
         started_at: null,
         ended_at: null,
@@ -200,6 +204,7 @@
             }
             t.started_at_pp = helpers.dateToStr(t.started_at); 
             t.ended_at_pp = helpers.dateToStr(t.ended_at); 
+            //console.info(typeof t.id);
             return t;
         },
         fetch: function(url, params) {
@@ -282,11 +287,19 @@
         });
     });
 
-    //app.TestRoute = Ember.Route.extend({
-    //  model: function(params) {
-    //    return app.Test.find({ id: params.post_id });
-    //  }
-    //});
+    app.TestRoute = Ember.Route.extend({
+        model: function(params) {
+            var testsController = this.controllerFor('tests');
+            var testController = this.controllerFor('test');
+            var existingModel  = testsController.findProperty('id', parseInt(params.test_id, 10));
+
+            console.info(existingModel);
+            if (existingModel) {
+                return existingModel;
+            }
+            return testController.fetch(params.test_id);
+        }
+    });
 
     app.IndexRoute = Ember.Route.extend({
         redirect: function() {

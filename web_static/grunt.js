@@ -11,8 +11,8 @@ module.exports = function(grunt) {
         'static/js/3d_party/bootstrap-dropdown.js',
         'static/js/3d_party/bootstrap-tooltip.js',
         'static/js/3d_party/mousetrap.min.js',
-        'static/js/3d_party/handlebars-1.0.rc.1.js',
-        'static/js/3d_party/ember-1.0.0-pre.2.min.js'
+        'static/js/3d_party/handlebars-1.0.rc.2.js',
+        'static/js/3d_party/ember-1.0.0-pre.4.min.js',
     ];
     var js_firebat = [
         'static/js/app/const.js',

@@ -22,7 +22,7 @@
     <tbody>
       {{#each item in controller}}
         <tr>
-          <td>{{item.title.test_name}}</td>
+          <td>{{#linkTo test item}}{{item.title.test_name}}{{/linkTo}}</td>
           <td>{{item.status_name}}</td>
           <td>{{item.title.task}}</td>
           <td>{{item.started_at_pp}}</td>
