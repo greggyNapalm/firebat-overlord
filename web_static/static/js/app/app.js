@@ -13,7 +13,7 @@
 	'use strict';
 
 	win.Firebat = Ember.Application.create({
-        LOG_TRANSITIONS:true,
+        //LOG_TRANSITIONS:true,
         //Store: DS.Store.extend({
         //    revision: 11
         //}),
@@ -53,7 +53,7 @@
         templateName:  'testsTemplate',
         didInsertElement: function() {
             var self = this;
-            console.info(self.get('controller'));
+            //console.info(self.get('controller'));
             //if (!(app.TestsPaginator.header)) {
             //    console.info('Emptie');
             //    self.get('controller').goToPage();
