@@ -14,9 +14,9 @@
 
 	win.Firebat = Ember.Application.create({
         LOG_TRANSITIONS:true,
-        Store: DS.Store.extend({
-            revision: 11
-        }),
+        //Store: DS.Store.extend({
+        //    revision: 11
+        //}),
 		ApplicationController: Ember.Controller.extend({
             needs: ['settings', 'tests'],
             prefetch: function() {
